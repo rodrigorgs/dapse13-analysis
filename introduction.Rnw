@@ -15,7 +15,7 @@ Each pattern contains an \emph{Examples} section with code snippets showing how 
 
 The NetBeans project uses Bugzilla\footnote{\url{http://www.bugzilla.org/}} as its bug tracking system, which stores all data in a MySQL database. The source code presented here refers to database tables and columns used by Bugzilla, but it should work with any bug tracking system with minor changes.
 
-Although the full NetBeans data set contains 57 database tables, in this paper only three are used: {\tt bugs}, {\tt changes} (originally, {\tt bugs\_activity}), and {\tt comments} (originally, {\tt longdescs}). Notice that some tables and columns were renamed for clarity purposes.
+Although the full NetBeans data set contains 57 database tables, in this paper only two are used: {\tt bugs} and {\tt changes} (originally, {\tt bugs\_activity}). One table and a few columns were renamed for clarity purposes.
 
 The {\tt bugs} table contains general information about each bug report, which is identified by a unique number (column {\tt bug}). Each bug report has a {\tt severity}, a {\tt priority}, and two timestamps: the time of creation ({\tt creation.time}), and the time of the last modification ({\tt modif.time}). Table~\ref{tab:bugs} shows a sample of the {\tt bugs} table.
 
@@ -29,23 +29,6 @@ bugs$reporter <- NULL
 x <- xtable(bugs,
   caption="Sample of {\\tt bugs} table, hour info omitted.",
   label="tab:bugs")
-print(x, 
-  include.rownames=FALSE, 
-  caption.placement="top",
-  table.placement="!t")
-@
-
-The {\tt comments} table contains comments that each {\tt user} added to a {\tt bug} report at some point in {\tt time}. To reduce the file size, the comment text was replaced by its MD5 hash (column {\tt comment.md5}). With high probability, two comments are represented by the same hash number if and only if they contain the same text. Table~\ref{tab:comments} shows a sample of the {\tt comments} table.
-
-<<echo=FALSE, results=tex>>=
-library(xtable)
-comments <- readRDS("data/netbeans-platform-headcomments.rds")
-comments <- comments[4:6, ]
-comments$time <- as.character(as.Date(comments$time))
-comments$comment.id <- NULL
-x <- xtable(comments,
-  caption="Sample of {\\tt comments} table, hour info omitted.",
-  label="tab:comments")
 print(x, 
   include.rownames=FALSE, 
   caption.placement="top",

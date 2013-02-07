@@ -9,7 +9,7 @@
 
 \Context
 
-  Developers tend to assume specific roles in the process of tracking bugs. While many developers participate by fixing bugs, quality engineers usually take bug fixes and verify if they are appropriate. Making the distiction between quality engineers and other developers is important when studying the influence of human factors in the handling of bugs.
+  Developers tend to assume specific roles in the process of tracking bugs. While many developers participate by fixing bugs, quality engineers usually take bug fixes and verify if they are appropriate. Making the distiction between quality engineers and other developers is important when studying the influence of human factors on outcomes of the software development process.
 
   %Not all developers fix bugs as their main activity. Quality engineers Some developers are \emph{fixers}, i.e., they write code to resolve open bugs. \emph{Verifiers}, on the other hand, check if the fixes are appropriate. 
 
@@ -33,11 +33,13 @@
 
 \Discussion
 
-  It is a common mistake to use the absolute number of verifications to determine if a developer is a quality engineer. In some projects, however, developers that fixes bugs also mark them as {\tt VERIFIED}. Because of that, the ratio between verifications and fixes is a better indicator.
+  It is a common mistake to use the absolute number of verifications to determine if a developer is a quality engineer. The absolute number is a poor indicator because, in some projects, developers that fix bugs also mark them as {\tt VERIFIED}. %Because of that, the ratio between verifications and fixes is a better indicator.
 
-  Developers can change roles over time. If this is the case, consider analyzing a shorter period of time. Even better, use sliding windows, i.e., analyze multiple consecutive short periods over time.
+  Developers can change roles over time. If this is the case, consider analyzing a shorter period of time. Even better, use sliding windows, i.e., analyze multiple consecutive short periods, one at a time.
 
 \Example
+
+  This solution was used by Souza and Chavez~\cite{Souza2012}. They used a threshold of 10 for the ratio between verifications and fixes. In the source code below, we show how to apply this solution to NetBeans/Platform:
 
 <<echo=FALSE,results=hide>>=
 changes <- readRDS("../data/netbeans-platform-changes.rds")
@@ -50,14 +52,15 @@ t2 <- table(status$user, status$new.value)
 t <- merge(as.data.frame.matrix(t1), 
            as.data.frame.matrix(t2),
            by="row.names")
-t$qe <- t$VERIFIED / (1 + t$FIXED) > 10
+threshold <- 10
+t$qe <- t$VERIFIED / (1 + t$FIXED) > threshold
 total <- sum(t$VERIFIED)
-part <- sum(t$VERIFIED[t$qe]) / total
-if (part < 0.5)
-  t$qe <- FALSE
+proportion <- sum(t$VERIFIED[t$qe]) / total
 num.qe.developers <- sum(t$qe)
 @
 
+  By running the code, we find there are \Sexpr{num.qe.developers} quality engineers, who are responsible for about \Sexpr{as.integer(100*proportion)}\% of the verifications.
+
 \RelatedPatterns
 
-  What threshold to use to distinguish between quality engineer and other developers? What percentage of verifications a group of developers has to perform for them to be considered a quality engineering team? There are no magic numbers; as always, be sure to [Choose a Suitable Threshold].
+  While this patterns helps locate people who concentrate quality efforts, the pattern \emph{Testing Phase} (Section~\ref{pat:phase}) helps find periods with intense testing activity.

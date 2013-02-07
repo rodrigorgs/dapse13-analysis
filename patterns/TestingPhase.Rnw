@@ -1,4 +1,4 @@
-\Name{Testing Phase}
+\Name{Testing Phase} \label{pat:phase}
 
 \Problem
 
@@ -6,23 +6,27 @@
 
 \Context
 
-  Before a new version is shipped to final users, it is common to test new implemented features and bug fixes. Sometimes most of the testing effort is concentrated on a well-defined testing phase, that precedes the next release. In a bug tracking system, testing efforts are recorded as bug status changes, from {\tt RESOLVED} to {\tt VERIFIED}. Testing phases, therefore, should appear as a relatively large number of verifications comprised in a relatively short period.
+  Before a new version is shipped to final users, it is common to test new features and bug fixes. In some projects, most of the testing effort is concentrated on a well-defined testing phase, that precedes the release of the next version of the software. 
+
+  In a bug tracking system, testing efforts are recorded as bug status changes, from {\tt RESOLVED} to {\tt VERIFIED}. Testing phases, therefore, should appear as a relatively large number of verifications comprised in a relatively short period.
 
 \Solution
 
   \emph{Solution 1}. Select verifications, i.e., changes that set the bug status to {\tt VERIFIED}. Then, plot the accumulated number of verifications over time using a line chart. If you know the software release dates, highlight them in the chart with vertical lines. Although the chart is monotonically increasing, some portions may exhibit a steeper ascent, that represents a period with high verification activity. Such periods may be testing phases, particularly if they precede a release date.
 
-  \emph{Solution 2}. Select verifications, i.e., changes that set the bug status to {\tt VERIFIED}. If there are two or more verifications at the exact same time, choose only one. Then, apply Kleinberg's algorithm~\cite{Kleinberg2002} to the vector of times in order to detect bursts, i.e., periods of intense verification activity. 
+  \emph{Solution 2}. Select verifications, i.e., changes that set the bug status to {\tt VERIFIED}. 
+  %If there are two or more verifications at the exact same time, choose only one. 
+  Then, apply Kleinberg's algorithm~\cite{Kleinberg2002} to verification times in order to detect bursts, i.e., periods of intense verification activity. 
 
-  The algorithm is based on a Markov model and outputs a hierarchical burst structure. The first level comprises the entire period; the second level contains bursts in the period; the third level, bursts within second-level bursts, and so on. For our purposes, it should be enough to consider second-level bursts.
+  The algorithm is based on a Markov model and outputs a hierarchical burst structure. The first level comprises the entire period; the second level contains bursts in the period; the third level, bursts within second-level bursts, and so on. For our purposes, second-level bursts are good testing phase candidates.
 
 \Discussion
 
-  The first solution is suitable for visual exploration of the data. If the data set is too large, however, it becomes difficult to visualize. The second solution is objective, but is computationally expensive.
+  The first solution is suitable for visual exploration of the data. If the data set is too large, however, it becomes difficult to visualize. The second solution is objective, though computationally expensive.
 
   %There is a third solution, not discussed here: use Kleinberg's algorithm~\cite{Kleinberg2002} to detect bursts of verification activity. It uses a Markov model and is more computationally intensive. The algorithm is implemented in a R package called {\tt bursts}.
 
-  Be suspicious if the number of verifications for a particular day is too high (e.g., 50). Such verifications may be the result of a mass verification, i.e., multiple bug reports were simultaneously updated in order to tidy the bug tracking system. To assess if this is the case, analyze the individual verifications on that day. If most of them were performed by the same person, separated by a few seconds or minutes from each other, then they are likely the result of a mass verification, and not motivated by a testing phase.
+  Be suspicious if the number of verifications per day is too high (e.g., above 50). Such verifications may be the result of a mass verification, i.e., multiple bug reports were simultaneously updated in order to tidy the bug tracking system. To assess if this is the case, analyze the individual verifications on that day. If most of them were performed by the same person, separated by a few seconds or minutes from each other, then they are likely the result of a mass verification, instead of a testing phase.
 
 \Example
 
@@ -56,7 +60,7 @@ labels <- format(as.yearmon(ticks), "%Y-%m")
 axis(1, at = ticks, labels=labels, las=2)
 @
 
-  The result is Figure~\ref{fig:phases}. Notice how verification activity (steep ascents) is concentrated just before release dates (dashed vertical lines), suggesting there are well-defined testing phases in Eclipse/Platform.
+  The result is shown in Figure~\ref{fig:phases}. Notice how verification activity (steep ascents) is concentrated just before release dates (dashed vertical lines), suggesting there are well-defined testing phases in Eclipse/Platform.
 
 \begin{figure}[!t]
 \centering
@@ -71,12 +75,20 @@ axis(1, at = ticks, labels=labels, las=2)
 nrows <- 6
 @
 
-  The following R code shows how to apply the second solution, using Kleinberg's algorithm. The {\tt ver} variable is reused from the previous snippet of code. The first \Sexpr{nrows} bursts are shown in Table~\ref{tab:bursts}.
+  The following R code shows how to apply the second solution, using Kleinberg's algorithm and taking second-level bursts. Then, we count the number of verifications in each burst. The {\tt ver} variable is reused from the previous snippet of code. The first \Sexpr{nrows} bursts are shown in Table~\ref{tab:bursts}.
 
 <<>>=
 library(bursts)
 k <- kleinberg(unique(ver$time))
 bursts <- subset(k, level == 2)
+
+# Num. of verifications (total and per day average)
+bursts$count <- apply(bursts, 1, function(x) 
+  sum(ver$time > as.POSIXct(x["start"]) 
+      & ver$time < as.POSIXct(x["end"])))
+days <- as.Date(bursts$end) - as.Date(bursts$start)
+days <- days + 1
+bursts$per.day <- bursts$count %/% as.numeric(days)
 @
 
 <<echo=FALSE,results=tex>>=
@@ -85,6 +97,7 @@ h <- head(bursts, nrows)
 h$level <- NULL
 h$start <- as.character(h$start)
 h$end <- as.character(h$end)
+h$per.day <- as.integer(h$per.day)
 x <- xtable(h, 
   caption="Periods with intense verification activity (sample).",
   label="tab:bursts")

@@ -10,18 +10,17 @@
 
 \Solution
 
-  \emph{Solution 1}. Plot the accumulated number of verifications over time using a line chart. If you know the software release dates, highlight them in the chart with vertical lines. The chart is monotonically increasing, but some portions may exhibit a steeper ascent, that stands for periods with a high verification activity. Such periods may be testing phases, particularly if they precede a release date.
+  \emph{Solution 1}. Select verifications, i.e., changes that set the bug status to {\tt VERIFIED}. Then, plot the accumulated number of verifications over time using a line chart. If you know the software release dates, highlight them in the chart with vertical lines. Although the chart is monotonically increasing, some portions may exhibit a steeper ascent, that represents a period with high verification activity. Such periods may be testing phases, particularly if they precede a release date.
 
-  \emph{Solution 2}. Count the number of verifications per day (i.e., changes that set a bug status to {\tt VERIFIED}). If, for a particular day, the number is above some threshold (e.g., 5 verifications), then mark that day as testing phase candidate.
+  \emph{Solution 2}. Select verifications, i.e., changes that set the bug status to {\tt VERIFIED}. If there are two or more verifications at the exact same time, choose only one. Then, apply Kleinberg's algorithm~\cite{Kleinberg2002} to the vector of times in order to detect bursts, i.e., periods of intense verification activity. 
 
-  Group together testing phase candidates that are at most a few days apart from each other (e.g., 3 days, to account for holidays and weekends).
-  Count the total number of verifications in each group. If the number is above some threshold (e.g., 20 verifications), then that group of days comprise a testing phase.
+  The algorithm is based on a Markov model and outputs a hierarchical burst structure. The first level comprises the entire period; the second level contains bursts in the period; the third level, bursts within second-level bursts, and so on. For our purposes, it should be enough to consider second-level bursts.
 
 \Discussion
 
-  The first solution is suitable for visual exploration of the data. If the data set is too large, however, it becomes difficult to visualize. The second solution is more scalable and deterministic, but relies on a careful choice of thresholds.
+  The first solution is suitable for visual exploration of the data. If the data set is too large, however, it becomes difficult to visualize. The second solution is objective, but is computationally expensive.
 
-  There is a third solution, not discussed here: use Kleinberg's algorithm~\cite{Kleinberg2002} to detect bursts of verification activity. It uses a Markov model and is more computationally intensive. The algorithm is implemented in a R package called {\tt bursts}.
+  %There is a third solution, not discussed here: use Kleinberg's algorithm~\cite{Kleinberg2002} to detect bursts of verification activity. It uses a Markov model and is more computationally intensive. The algorithm is implemented in a R package called {\tt bursts}.
 
   Be suspicious if the number of verifications for a particular day is too high (e.g., 50). Such verifications may be the result of a mass verification, i.e., multiple bug reports were simultaneously updated in order to tidy the bug tracking system. To assess if this is the case, analyze the individual verifications on that day. If most of them were performed by the same person, separated by a few seconds or minutes from each other, then they are likely the result of a mass verification, and not motivated by a testing phase.
 
@@ -48,9 +47,13 @@ abline(v=releases$date, lty=2)
 @
 
 <<figphases,echo=FALSE,include=FALSE>>=
-par(mar=c(4,4,1,1)+0.1)
-with(ver, plot(n.changes ~ time, type="l"))
+library(zoo)
+par(mar=c(4.5,4,1,1)+0.1)
+with(ver, plot(n.changes ~ time, type="l", xaxt="n", xlab=""))
 abline(v=releases$date, lty=2)
+ticks <- seq(min(ver$time), max(ver$time), by = "months")
+labels <- format(as.yearmon(ticks), "%Y-%m")
+axis(1, at = ticks, labels=labels, las=2)
 @
 
   The result is Figure~\ref{fig:phases}. Notice how verification activity (steep ascents) is concentrated just before release dates (dashed vertical lines), suggesting there are well-defined testing phases in Eclipse/Platform.
@@ -60,11 +63,36 @@ abline(v=releases$date, lty=2)
 <<fig=TRUE,echo=FALSE,width=6,height=4.3>>=
 <<figphases>>
 @
-  \caption{Accumulated number of changes over time and release dates.}
+  \caption{Accumulated number of verifications over time.}
   \label{fig:phases}
 \end{figure}
 
-  
+<<echo=FALSE,results=hide>>=
+nrows <- 6
+@
+
+  The following R code shows how to apply the second solution, using Kleinberg's algorithm. The {\tt ver} variable is reused from the previous snippet of code. The first \Sexpr{nrows} bursts are shown in Table~\ref{tab:bursts}.
+
+<<>>=
+library(bursts)
+k <- kleinberg(unique(ver$time))
+bursts <- subset(k, level == 2)
+@
+
+<<echo=FALSE,results=tex>>=
+library(xtable)
+h <- head(bursts, nrows)
+h$level <- NULL
+h$start <- as.character(h$start)
+h$end <- as.character(h$end)
+x <- xtable(h, 
+  caption="Periods with intense verification activity (sample).",
+  label="tab:bursts")
+print(x,
+  include.rownames=FALSE,
+  caption.placement="top",
+  table.placement="!t")
+@
 
 \RelatedPatterns
 

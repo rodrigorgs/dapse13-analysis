@@ -1,0 +1,19 @@
+\Name{Read the Fine Messages}
+
+(aka Read the Fine Comments)
+
+\Problem
+
+How to know if a specific status change really represents what you think it represents?
+
+\Context
+
+a specific status change may have different meanings on different projects. For example, when a bug is marked as FIXED, does it mean that a patch was submitted? That the fix is available in the version control system?
+
+\Solution
+
+don't be afraid and read the comments of a few cases in which that status change occurs. Specially comments of bugs that are exceptional in one way or another.
+
+\RelatedPatterns
+
+it is more productive to read comments that are related. You may want to [Classify] your data before .

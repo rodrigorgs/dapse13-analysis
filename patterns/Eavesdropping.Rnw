@@ -1,0 +1,19 @@
+\Name{Eavesdropping}
+
+(aka Be a regular reader/listener)
+
+\Problem
+
+how to detect what is not explicit in the bug metadata?
+
+\Solution
+
+do a text search. Maybe use regular patterns.
+
+\Example
+
+verification techniques reported by developers.
+
+\RelatedPatterns
+
+read the fine comments.

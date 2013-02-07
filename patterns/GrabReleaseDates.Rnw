@@ -1,0 +1,31 @@
+\Name{Grab the Release Dates}
+
+\Problem
+
+  How to discover the release dates for all versions of a software?
+
+\Context
+
+  Releases are important milestones in a project, as they represent the end of a development cycle. Different development tasks may be performed based on the proximity of a release date. For example, verification and validation tasks are expected before a release, and final users only report bugs for a version after it has been released.
+
+  It should be easy for a data scientist to discover the release dates for the most recent versions of a project, as they are usually displayed on the download page. However, older release dates may not always be available.
+
+\Solution
+
+  %There are two common solutions to this problem: one involves a version control system, and the other one, the project's website.
+
+  \emph{Solution 1}. Some projects tag specific revisions of the source code maintained at a version control system. Identify tags that denote specific releases, by looking at the tag name. Consider the dates of these tags as release dates.
+
+  \emph{Solution 2}. The Internet Archive Wayback Machine\footnote{\url{http://archive.org/web/web.php}} is a free service that archives copies of web pages since 1996. Find the web page that lists the latest versions, together with release dates. Then, enter the URL in the Wayback Machine to see historical versions of the page that, hopefully, contain older release dates.
+
+\Discussion
+
+  Tags in a version control system are used internally by developers, and may not represent the exact date when the version was available for download. Web pages are more accurate in this sense, but they may not list intermediate, development versions.
+
+\Example
+
+  The second solution was used by Souza et al.~\cite{Souza2012} to discover release dates for the project Eclipse/Platform.
+
+\RelatedPatterns
+
+  If you [Look Out for Mass Edits], you may find other important events in a project's life, such as policy and process changes.

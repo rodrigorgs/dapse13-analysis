@@ -1,0 +1,26 @@
+\Name{Triangulate / Check}
+
+Check your inferences by reading a sample of the data.
+
+
+\Name{Explore}
+
+Read some data to get the idiosyncrasies of each project. See Read the Fine Comments, Know Your Project, Eavesdropping.
+
+\Name{Choose a suitable time grain}
+
+day? week? month? release?
+
+\Name{Future Perfect}
+
+When making predictions based on temporal data, you usually train your models on the available data, and then asks the question: how would the model perform on future data. The problem, of course, is that future data does not exist yet. A sensible approach to overcome this problem is to split your data set in two parts: earlier data and more recent data. The second part, recent data, represents the future from the point of view of an observer that only knows the earlier data. This way, you can train your model on the first part of the data and test it on the second part.
+
+\Name{Estimate time-related metrics}
+
+- tempo de correcao
+- tempo de verificacao
+- tempo de latencia
+- etc.
+
+Voce nao tem os dados exatos, tem que fazer simplificacoes, definir janelas razoaveis, definir intervalos de interesse.
+

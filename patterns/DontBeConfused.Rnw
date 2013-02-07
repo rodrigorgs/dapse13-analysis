@@ -1,0 +1,44 @@
+\Name{Don't Be Confused}
+%[numeric analysis (inference)] [generic domain]
+
+\Problem
+
+  Assess the association between two categorical variables while considering variables that may mask the association.
+  /
+  Discover categorical variables that mask the associaton between two other categorical variables.
+
+\Context
+
+  Measuring the associaton between two categorical variables gives some evidence of a causal relationship between them. However, an apparent association between two variables may be caused by a third variable that influences both. Or, on the contrary, a third variable may mask an existing association between two variables. Such variable is called a confounding variable.
+
+\Solution
+
+  Use mosaic plots. Mosaic plots are a visualization of contingency tables and help visualize the relationship between two or more categorical variables---although it can become hard to visualize with many variables.
+
+  A mosaic plot represents each cell in a contingency table by a rectangle with area proportional to the cell count. \todo{This is hard to describe!}
+
+  
+  
+
+  For categorical variables, use mosaic plots, stratified by possible confounding variables. 
+
+  Tests of independence: fisher test and chi-squared test.
+
+  % http://alumni.media.mit.edu/~tpminka/courses/36-350.2001/lectures/day12/
+  % http://cran.r-project.org/web/packages/vcdExtra/vignettes/vcd-tutorial.pdf
+  % http://www.jstatsoft.org/v17/i03/paper
+  % http://moderngraphics11.pbworks.com/w/file/fetch/38757969/MeyerEtAl.mosiacExtended.pdf
+
+  For continuous variables, use correlation matrices.
+
+\Discussion
+
+  Mosaic plots are easy to read with two variables, barely readable with 3 or 4, but start to become confusing with 5 or more. Mosaic matrices can be easier to visualize.
+
+\Example
+
+  Use mosaic plots. use correlation matrices.
+
+\RelatedPatterns
+
+  

@@ -1,0 +1,63 @@
+\Name{Not Everyone is a Programmer} \label{pat:subjects}
+%Meet the teams / Know your subjects}
+% [numeric analysis (inference)] [problem domain] 
+
+\Problem
+
+  Find the quality engineers on a team, if there is any.
+  %Discover the role of a developer in the bug tracking process.
+
+\Context
+
+  Developers tend to assume specific roles in the process of tracking bugs. While many developers participate by fixing bugs, quality engineers usually take bug fixes and verify if they are appropriate. Making the distiction between quality engineers and other developers is important when studying the influence of human factors in the handling of bugs.
+
+  %Not all developers fix bugs as their main activity. Quality engineers Some developers are \emph{fixers}, i.e., they write code to resolve open bugs. \emph{Verifiers}, on the other hand, check if the fixes are appropriate. 
+
+  %There are also \emph{triagers}, who find duplicate bug reports and add information to the reports, such as priority and target milestone. Knowing the roles of developers is important to study the influence of human factors in the handling of bugs.
+
+\Solution
+
+  Analyze each developer's activity in the bug tracking system, such as status and resolution changes. In particular, count how many times each developer has...
+
+  \begin{itemize}
+  	\item ... changed the status to {\tt VERIFIED} (number of verifications);
+  	\item ... changed the resolution to {\tt FIXED} (number of fixes).
+  	%\item ... changed the resolution to {\tt DUPLICATE}.
+  \end{itemize}
+  
+  Then, compute the ratio between verifications and fixes for each developer (add 1 to the number of fixes to avoid division by zero). If such ratio is greater than some threshold (e.g., 5 or 10), it suggests that the developer is specialized in verifications. Select all such developers and compute the total number of verifications performed by them, compared to the total number of verifications in the project. If they perform a great part of the verifications in the project (e.g., more than 50\%), then the project has a quality engineering team, formed by the that developers.
+
+%    changed a bug 
+
+% Analyze their activity in the bug tracking system, specially the status changes. Count the relative number of activities. Plot distribution of ratios. After discovering a group of developers with a specific role, see if the group is responsible for most of that activity in the project.
+
+\Discussion
+
+  It is a common mistake to use the absolute number of verifications to determine if a developer is a quality engineer. In some projects, however, developers that fixes bugs also mark them as {\tt VERIFIED}. Because of that, the ratio between verifications and fixes is a better indicator.
+
+  Developers can change roles over time. If this is the case, consider analyzing a shorter period of time. Even better, use sliding windows, i.e., analyze multiple consecutive short periods over time.
+
+\Example
+
+<<echo=FALSE,results=hide>>=
+changes <- readRDS("../data/netbeans-platform-changes.rds")
+@
+<<>>=
+resolution <- subset(changes, field == 'resolution')
+status <- subset(changes, field == 'bug_status')
+t1 <- table(resolution$user, resolution$new.value)
+t2 <- table(status$user, status$new.value)
+t <- merge(as.data.frame.matrix(t1), 
+           as.data.frame.matrix(t2),
+           by="row.names")
+t$qe <- t$VERIFIED / (1 + t$FIXED) > 10
+total <- sum(t$VERIFIED)
+part <- sum(t$VERIFIED[t$qe]) / total
+if (part < 0.5)
+  t$qe <- FALSE
+num.qe.developers <- sum(t$qe)
+@
+
+\RelatedPatterns
+
+  What threshold to use to distinguish between quality engineer and other developers? What percentage of verifications a group of developers has to perform for them to be considered a quality engineering team? There are no magic numbers; as always, be sure to [Choose a Suitable Threshold].

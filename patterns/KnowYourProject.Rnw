@@ -1,0 +1,15 @@
+\Name{Know Your Project}
+
+\Problem
+
+\Context
+
+when you do not know your project, you run the risk of making wrong assumptions about the data.
+
+\Solution
+
+read developer documentation on the website. You may find guidelines, well defined roles and processes. Seek material in developer conferences.
+
+\Example
+
+eclipsecon, the talk ``eclipse way''. NetBeans docs talk about quality engineers.

@@ -1,0 +1,75 @@
+\section{Introduction}
+
+Bug tracking systems store bug reports for a software project and keep record of discussion and progress changes for each bug. This data can be used not only to assess quality attributes of the software, but also to reason about its development process. Such richness of information makes bug reports an invaluable source for data scientists interested in software engineering.
+
+However, bug tracking systems often contain data that is inaccurate, incomplete~\cite{Aranda2009}, or biased~\cite{Bird2009}. For example, changing the status of a bug report to {\tt VERIFIED} usually means that, after a resolution was found to the bug, some kind of software verification (e.g., source code inspection, testing) was performed and the resolution was considered appropriate. Sometimes, however, old bug reports are marked as verified just to help users and developers keep track of current bug reports~\cite{Souza2012}.
+
+%\todo[inline]{fall into common mistakes}
+Without proper guidance, it is easy to overlook pitfalls in the data and draw wrong conclusions. In this paper, we provide best practices and step-by-step solutions to recurring problems related to cleaning bug data. %from cleaning up bug data up to deriving meaningful conclusions from bug reports.
+
+%Each solution is presented in a structured form called pattern. A pattern consists of 6 sections: (1) a short \emph{name}; (2) the \emph{problem} being solved; (3) a \emph{context} in which the pattern can be applied; (4) one or more \emph{solutions} to the problem; (5) a \emph{discussion} of trade-offs and common mistakes to consider when using the pattern; and (6) \emph{examples} of the pattern in use. %; (7) \emph{related patterns}. 
+
+\section{Data Set}
+
+Each pattern contains an \emph{Examples} section with code snippets showing how to apply the pattern on real data. The snippets are written in R, a programming language for data analysis\footnote{\url{http://www.r-project.org/}}. The data used are bug reports from the project NetBeans/Platform, made available for the 2011 edition of the MSR Mining Challenge\footnote{http://2011.msrconf.org/msr-challenge.html}.
+
+The NetBeans project uses Bugzilla\footnote{\url{http://www.bugzilla.org/}} as its bug tracking system, which stores all data in a MySQL database. The source code presented here refers to database tables and columns used by Bugzilla, but it should work with any bug tracking system with minor changes.
+
+Although the full NetBeans data set contains 57 database tables, in this paper only three are used: {\tt bugs}, {\tt changes} (originally, {\tt bugs\_activity}), and {\tt comments} (originally, {\tt longdescs}). Notice that some tables and columns were renamed for clarity purposes.
+
+The {\tt bugs} table contains general information about each bug report, which is identified by a unique number (column {\tt bug}). Each bug report has a {\tt severity}, a {\tt priority}, and two timestamps: the time of creation ({\tt creation.time}), and the time of the last modification ({\tt modif.time}). Table~\ref{tab:bugs} shows a sample of the {\tt bugs} table.
+
+<<echo=FALSE, results=tex>>=
+library(xtable)
+bugs <- readRDS("data/netbeans-platform-bugs.rds")
+bugs <- head(bugs, 3)
+bugs$creation.time <- as.character(as.Date(bugs$creation.time))
+bugs$modif.time <- as.character(as.Date(bugs$modif.time))
+bugs$reporter <- NULL
+x <- xtable(bugs,
+  caption="Sample of {\\tt bugs} table, hour info omitted.",
+  label="tab:bugs")
+print(x, 
+  include.rownames=FALSE, 
+  caption.placement="top",
+  table.placement="!t")
+@
+
+The {\tt comments} table contains comments that each {\tt user} added to a {\tt bug} report at some point in {\tt time}. To reduce the file size, the comment text was replaced by its MD5 hash (column {\tt comment.md5}). With high probability, two comments are represented by the same hash number if and only if they contain the same text. Table~\ref{tab:comments} shows a sample of the {\tt comments} table.
+
+<<echo=FALSE, results=tex>>=
+library(xtable)
+comments <- readRDS("data/netbeans-platform-headcomments.rds")
+comments <- comments[4:6, ]
+comments$time <- as.character(as.Date(comments$time))
+comments$comment.id <- NULL
+x <- xtable(comments,
+  caption="Sample of {\\tt comments} table, hour info omitted.",
+  label="tab:comments")
+print(x, 
+  include.rownames=FALSE, 
+  caption.placement="top",
+  table.placement="!t")
+@
+
+The {\tt changes} table contains all modifications users made on bug reports over time. This includes changes in priority, status, resolution, or any other field in a bug report. Each row contains the {\tt new value} of a {\tt field} that was modified by a {\tt user}\footnote{In this context, user denotes a user of the bug tracking system, which can be either a developer or a final user.} at some point in {\tt time}. Table~\ref{tab:changes} shows a sample of the {\tt bugs} table.
+
+<<echo=FALSE, results=tex>>=
+library(xtable)
+changes <- readRDS("data/netbeans-platform-changes.rds")
+changes <- subset(changes, field %in% c("bug_status", "resolution"))[3:5,]
+changes$time <- as.character(as.Date(changes$time))
+x <- xtable(changes,
+  caption="Sample of {\\tt changes} table, hour info omitted.",
+  label="tab:changes")
+print(x, 
+  include.rownames=FALSE, 
+  caption.placement="top",
+  table.placement="!t")
+@
+
+The \emph{status} field is used to track the progress of the bug fixing activity. A bug report is created with status {\tt NEW} or {\tt UNCONFIRMED}. Then, its status may be changed to {\tt ASSIGNED}, to denote that a user has taken responsibility on the bug. After that, the bug is {\tt RESOLVED}, then optionally {\tt VERIFIED} by the quality assurance team, and finally {\tt CLOSED} when the next software release comes out. If, after resolving the bug, someone finds that the resolution was not appropriate, the status is changed to {\tt REOPENED}.
+
+%There are many ways to resolve a bug. To reflect that, when a bug status is changed to {\tt RESOLVED}, the \emph{resolution} field is changed either to {\tt FIXED}---if the software was changed to solve the issue---, {\tt WORKSFORME}---if developers were not able to reproduce the problem---, {\tt DUPLICATE}---if a previous bug report describes the same problem---, among other resolutions.
+
+All the data and code used in this paper is online\footnote{\url{https://github.com/rodrigorgs/dapse13-bugpatterns}}. 

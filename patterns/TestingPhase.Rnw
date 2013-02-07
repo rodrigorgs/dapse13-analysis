@@ -1,0 +1,71 @@
+\Name{Testing Phase}
+
+\Problem
+
+  Identify testing phases in the software development life cycle.
+
+\Context
+
+  Before a new version is shipped to final users, it is common to test new implemented features and bug fixes. Sometimes most of the testing effort is concentrated on a well-defined testing phase, that precedes the next release. In a bug tracking system, testing efforts are recorded as bug status changes, from {\tt RESOLVED} to {\tt VERIFIED}. Testing phases, therefore, should appear as a relatively large number of verifications comprised in a relatively short period.
+
+\Solution
+
+  \emph{Solution 1}. Plot the accumulated number of verifications over time using a line chart. If you know the software release dates, highlight them in the chart with vertical lines. The chart is monotonically increasing, but some portions may exhibit a steeper ascent, that stands for periods with a high verification activity. Such periods may be testing phases, particularly if they precede a release date.
+
+  \emph{Solution 2}. Count the number of verifications per day (i.e., changes that set a bug status to {\tt VERIFIED}). If, for a particular day, the number is above some threshold (e.g., 5 verifications), then mark that day as testing phase candidate.
+
+  Group together testing phase candidates that are at most a few days apart from each other (e.g., 3 days, to account for holidays and weekends).
+  Count the total number of verifications in each group. If the number is above some threshold (e.g., 20 verifications), then that group of days comprise a testing phase.
+
+\Discussion
+
+  The first solution is suitable for visual exploration of the data. If the data set is too large, however, it becomes difficult to visualize. The second solution is more scalable and deterministic, but relies on a careful choice of thresholds.
+
+  There is a third solution, not discussed here: use Kleinberg's algorithm~\cite{Kleinberg2002} to detect bursts of verification activity. It uses a Markov model and is more computationally intensive. The algorithm is implemented in a R package called {\tt bursts}.
+
+  Be suspicious if the number of verifications for a particular day is too high (e.g., 50). Such verifications may be the result of a mass verification, i.e., multiple bug reports were simultaneously updated in order to tidy the bug tracking system. To assess if this is the case, analyze the individual verifications on that day. If most of them were performed by the same person, separated by a few seconds or minutes from each other, then they are likely the result of a mass verification, and not motivated by a testing phase.
+
+\Example
+
+<<echo=FALSE,results=hide>>=
+changes <- readRDS("../data/eclipse-platform-changes.rds")
+releases <- readRDS("../data/eclipse-platform-releases.rds")
+@
+
+  The first solution was used by Souza and Chavez~\cite{Souza2012} (see Figure 2 in their paper). The following R code shows how to apply the solution to  Eclipse/Platform. Only a subset of the data is used, otherwise testing phases would be difficult to visualize. Assume {\tt releases\$date} is a vector with release dates.
+
+<<results=hide>>=
+ver <- subset(changes, 
+	field == "bug_status" 
+    & new.value == "VERIFIED")
+ver <- ver[order(ver$time), ]
+ver$n.changes <- 1:nrow(ver)
+ver <- subset(ver, 
+	time >= as.POSIXct("2009-06-10")
+    & time < as.POSIXct("2010-06-09"))
+with(ver, plot(n.changes ~ time, type="l"))
+abline(v=releases$date, lty=2)
+@
+
+<<figphases,echo=FALSE,include=FALSE>>=
+par(mar=c(4,4,1,1)+0.1)
+with(ver, plot(n.changes ~ time, type="l"))
+abline(v=releases$date, lty=2)
+@
+
+  The result is Figure~\ref{fig:phases}. Notice how verification activity (steep ascents) is concentrated just before release dates (dashed vertical lines), suggesting there are well-defined testing phases in Eclipse/Platform.
+
+\begin{figure}[!t]
+\centering
+<<fig=TRUE,echo=FALSE,width=6,height=4.3>>=
+<<figphases>>
+@
+  \caption{Accumulated number of changes over time and release dates.}
+  \label{fig:phases}
+\end{figure}
+
+  
+
+\RelatedPatterns
+
+  It should be noted that \emph{Not Everyone is a Programmer} (Section ~\ref{pat:subjects}): some teams have dedicated quality engineers that are responsible for testing. Well-defined testing phases are less common in such teams, because quality engineers constantly test features and bug fixes, and do not need to switch between programming and testing.

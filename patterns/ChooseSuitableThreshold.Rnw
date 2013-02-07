@@ -1,0 +1,57 @@
+\Name{Choose a Suitable Threshold} \label{pat:threshold}
+
+\Problem
+
+  Find a threshold for a metric so that data is separated into two distinct groups.
+
+\Context
+
+  Metrics are often used to help classify a data point into one of two groups. For example, they may help to determine if a data point is an outlier or not. When the mapping between data and groups is known for a subset of the data, then standard data mining techniques, such as cross-validation, can be leveraged to yield a threshold. The problem is more difficult if there is no information about the composition of the groups.
+
+\Solution
+
+  In fact, this is a hard, highly context-dependant problem, and it is related to finding outliers. Usually, the distribution of a metric is analyzed by means of a density plot, a box plot, or a bean plot (that mixes concepts from the later two). For heavily skewed data, logarithmic scales are used.
+
+  For example, consider the metric ``number of verifications per developer and day in a bug tracking system'' (``verification'' means that the bug status was changed to {\tt VERIFIED}. We would like to find a threshold such as, when the metric is greater than the threshold, it suggests that the verifications were actually just a mass verification for cleanup purposes.
+
+  It does not make sense to talk about a mass verification with just one or two verifications, so let's consider only greater values, then plot the density estimates. Because the distribution is heavily skewed, a logarithmic scale is used:
+
+<<echo=F,results=hide>>=
+library(plyr)
+changes <- readRDS("../data/netbeans-platform-changes.rds")
+
+ver <- subset(changes, field == "bug_status" 
+              & new.value == "VERIFIED")
+ver <- ver[order(ver$time), ]
+ver$n.changes <- 1:nrow(ver)
+with(ver, plot(n.changes ~ time, type="l"))
+
+ver$date <- as.Date(ver$time)
+cnt <- count(ver, c("date", "user"))
+cnt <- cnt[order(cnt$freq, decreasing=T), ]
+metric <- cnt$freq
+@
+
+<<fig=TRUE,width=6,height=3>>=
+metric <- metric[metric > 2]
+plot(density(metric), log="x")
+abline(v=20, lty=3)
+@
+
+  A value around 20 appears to be a boundary between frequent and unfrequent values for the metric, as shown with a vertical line, and thus may be a good choice for a threshold to distinguish between usual and unusual numbers of verifications per developer and day.
+
+  % http://d-scholarship.pitt.edu/7948/1/Seo.pdf
+\Discussion
+
+  Looking for a suitable threshold can be highly subjective, and depends on the problem at hand. For example, if the problem requires an answer with high precision, it is better to choose a more restrictive threshold. 
+  Sometimes, thresholds can be inferred from natural human limits. For example, how many bugs can a developer fix in a single day? A reasonable answer can be used as a threshold to filter out invalid data.
+
+  It can be that the metric chosen is not sufficient to distinguish between the two groups. In that case, choose another metric or a combination of metrics.
+
+\Example
+
+  Souza et al.~\cite{Souza2012} used density plots of the ratio between verifications and fixes by developers in order to find a threshold to help identify quality engineers.
+
+\RelatedPatterns
+
+  This pattern can be used together with several other patterns, e.g., [Mass Edits], [Know Your Subjects] etc.

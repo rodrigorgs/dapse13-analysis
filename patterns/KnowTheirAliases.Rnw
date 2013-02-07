@@ -1,0 +1,9 @@
+\Name{Know their aliases/names}
+
+\Problem
+
+how to discover the multiple identities of a developer?
+
+\Solution
+
+use the methods proposed by Bird et al. in Mining Email Social

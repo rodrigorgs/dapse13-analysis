@@ -1,0 +1,19 @@
+\Name{This Case is Classified}
+
+(aka Classify your Cases / Make your cases classified / Separate the wheat from the chaff)
+
+
+\Problem
+
+How to avoid analysing cases that you are not interested in?
+
+\Context
+
+
+\Solution
+
+create scripts to automate the classification and enrich your data with derived observations.
+
+\RelatedPatterns
+
+after classifying the cases, [Read the Fine Comments] of each class and verify if the classification is adequate

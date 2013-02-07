@@ -1,0 +1,13 @@
+\Name{Count 'em all}
+
+\Problem
+
+How to know if your variables are associated?
+
+\Solution
+
+count the cases. Built a contingency table. After that you can use Fisher's exact test to assess association.
+
+\RelatedPatterns
+
+[Classify] your data (make sure your [data is classified])

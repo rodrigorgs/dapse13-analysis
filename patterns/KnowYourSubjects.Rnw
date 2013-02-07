@@ -9,7 +9,7 @@
 
 \Context
 
-  Developers tend to assume specific roles in the process of tracking bugs. While many developers participate by fixing bugs, quality engineers usually take bug fixes and verify if they are appropriate. Making the distiction between quality engineers and other developers is important when studying the influence of human factors on outcomes of the software development process.
+  Developers tend to assume specific roles in the software development process. While many developers participate by fixing bugs, quality engineers usually take bug fixes and verify if they are appropriate. Making the distinction between quality engineers and other developers is important when studying the influence of human factors on outcomes of the software development process.
 
   %Not all developers fix bugs as their main activity. Quality engineers Some developers are \emph{fixers}, i.e., they write code to resolve open bugs. \emph{Verifiers}, on the other hand, check if the fixes are appropriate. 
 
@@ -25,7 +25,7 @@
   	%\item ... changed the resolution to {\tt DUPLICATE}.
   \end{itemize}
   
-  Then, compute the ratio between verifications and fixes for each developer (add 1 to the number of fixes to avoid division by zero). If such ratio is greater than some threshold (e.g., 5 or 10), it suggests that the developer is specialized in verifications. Select all such developers and compute the total number of verifications performed by them, compared to the total number of verifications in the project. If they perform a great part of the verifications in the project (e.g., more than 50\%), then the project has a quality engineering team, formed by the that developers.
+  Then, compute the ratio between verifications and fixes for each developer (add 1 to the number of fixes to avoid division by zero). If such ratio is greater than some threshold (e.g., 5 or 10), it suggests that the developer is specialized in verifications. Select all such developers and compute the total number of verifications performed by them, compared to the total number of verifications in the project. If they perform a great part of the verifications in the project (e.g., more than 50\%), then the project has a quality engineering team, formed by that developers.
 
 %    changed a bug 
 
@@ -63,4 +63,4 @@ num.qe.developers <- sum(t$qe)
 
 \RelatedPatterns
 
-  While this patterns helps locate people who concentrate quality efforts, the pattern \emph{Testing Phase} (Section~\ref{pat:phase}) helps find periods with intense testing activity.
+  While this patterns helps locate people who concentrate quality efforts, the pattern \emph{Testing Phase} (Section~\ref{pat:phase}) helps find periods in which such efforts are concentrated.

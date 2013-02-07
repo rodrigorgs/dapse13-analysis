@@ -8,11 +8,11 @@
 
   Before a new version is shipped to final users, it is common to test new features and bug fixes. In some projects, most of the testing effort is concentrated on a well-defined testing phase, that precedes the release of the next version of the software. 
 
-  In a bug tracking system, testing efforts are recorded as bug status changes, from {\tt RESOLVED} to {\tt VERIFIED}. Testing phases, therefore, should appear as a relatively large number of verifications comprised in a relatively short period.
+  In a bug tracking system, testing efforts are recorded as bug status changes, from {\tt RESOLVED} to {\tt VERIFIED}. Testing phases, therefore,  show up as a relatively large number of verifications comprised in a relatively short period.
 
 \Solution
 
-  \emph{Solution 1}. Select verifications, i.e., changes that set the bug status to {\tt VERIFIED}. Then, plot the accumulated number of verifications over time using a line chart. If you know the software release dates, highlight them in the chart with vertical lines. Although the chart is monotonically increasing, some portions may exhibit a steeper ascent, that represents a period with high verification activity. Such periods may be testing phases, particularly if they precede a release date.
+  \emph{Solution 1}. Select verifications, i.e., changes that set the bug status to {\tt VERIFIED}. Then, plot the accumulated number of verifications over time using a line chart. If you know the software release dates, highlight them in the chart with vertical lines. Although the chart is monotonically increasing, some portions may exhibit a steeper ascent, that represents a period with high verification activity. Such periods probably are testing phases, particularly if they precede a release date.
 
   \emph{Solution 2}. Select verifications, i.e., changes that set the bug status to {\tt VERIFIED}. 
   %If there are two or more verifications at the exact same time, choose only one. 
@@ -26,7 +26,7 @@
 
   %There is a third solution, not discussed here: use Kleinberg's algorithm~\cite{Kleinberg2002} to detect bursts of verification activity. It uses a Markov model and is more computationally intensive. The algorithm is implemented in a R package called {\tt bursts}.
 
-  Be suspicious if the number of verifications per day is too high (e.g., above 50). Such verifications may be the result of a mass verification, i.e., multiple bug reports were simultaneously updated in order to tidy the bug tracking system. To assess if this is the case, analyze the individual verifications on that day. If most of them were performed by the same person, separated by a few seconds or minutes from each other, then they are likely the result of a mass verification, instead of a testing phase.
+  Be suspicious if the number of verifications per day is too high (e.g., above 50). Such verifications may be the result of a mass verification, when multiple bug reports are simultaneously updated in order to tidy the bug tracking system. To determine if this is the case, analyze the individual verifications on that day. If most of them were performed by the same person, a few seconds or minutes apart from each other, then they are likely the result of a mass verification.
 
 \Example
 
@@ -64,7 +64,7 @@ axis(1, at = ticks, labels=labels, las=2)
 
 \begin{figure}[!t]
 \centering
-<<fig=TRUE,echo=FALSE,width=6,height=4.3>>=
+<<fig=TRUE,echo=FALSE,width=6,height=4.0>>=
 <<figphases>>
 @
   \caption{Accumulated number of verifications over time.}
@@ -72,10 +72,10 @@ axis(1, at = ticks, labels=labels, las=2)
 \end{figure}
 
 <<echo=FALSE,results=hide>>=
-nrows <- 6
+nrows <- 5
 @
 
-  The following R code shows how to apply the second solution, using Kleinberg's algorithm and taking second-level bursts. Then, we count the number of verifications in each burst. The {\tt ver} variable is reused from the previous snippet of code. The first \Sexpr{nrows} bursts are shown in Table~\ref{tab:bursts}.
+  The following R code shows how to apply the second solution, using Kleinberg's algorithm and taking second-level bursts. Then, we count the number of verifications, total and per day, in each burst. The variable {\tt ver} is reused from the previous snippet of code. The first \Sexpr{nrows} bursts are shown in Table~\ref{tab:bursts}.
 
 <<>>=
 library(bursts)
@@ -109,4 +109,4 @@ print(x,
 
 \RelatedPatterns
 
-  It should be noted that \emph{Not Everyone is a Programmer} (Section ~\ref{pat:subjects}): some teams have dedicated quality engineers that are responsible for testing. Well-defined testing phases are less common in such teams, because quality engineers constantly test features and bug fixes, and do not need to switch between programming and testing.
+  It should be noted that \emph{Not Everyone is a Programmer} (Section ~\ref{pat:subjects}): some teams have dedicated quality engineers that are responsible for testing. Well-defined testing phases are less common in such teams, because quality engineers constantly test features and bug fixes, and therefore do not need to switch between programming and testing activities.

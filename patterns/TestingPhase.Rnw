@@ -10,6 +10,8 @@
 
   In a bug tracking system, testing efforts are recorded as bug status changes, from {\tt RESOLVED} to {\tt VERIFIED}. Testing phases, therefore,  show up as a relatively large number of verifications comprised in a relatively short period.
 
+  Failing to recognize testing phases mislead analyses. For example, if most bugs are verified during a testing phase, then measuring the time from {\tt RESOLVED} to {\tt VERIFIED} does not measure verification effort. Instead, it reflects how early a bug was resolved with respect to the next testing phase.
+
 \Solution
 
   \emph{Solution 1}. Select verifications, i.e., changes that set the bug status to {\tt VERIFIED}. Then, plot the accumulated number of verifications over time using a line chart. If you know the software release dates, highlight them in the chart with vertical lines. Although the chart is monotonically increasing, some portions may exhibit a steeper ascent, that represents a period with high verification activity. Such periods probably are testing phases, particularly if they precede a release date.

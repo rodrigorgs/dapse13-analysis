@@ -20,7 +20,7 @@
   %If there are two or more verifications at the exact same time, choose only one. 
   Then, apply Kleinberg's algorithm~\cite{Kleinberg2002} to verification times in order to detect bursts, i.e., periods of intense verification activity. 
 
-  The algorithm is based on a Markov model and outputs a hierarchical burst structure. The first level comprises the entire period; the second level contains bursts in the period; the third level, bursts within second-level bursts, and so on. For our purposes, second-level bursts are good testing phase candidates.
+  The algorithm is based on a Markov model and outputs a hierarchical burst structure. The first level comprises the entire period; the second level contains bursts in the period; the third level, bursts within second-level bursts, and so on. In the data we analyzed, second-level bursts spanned a few days, which seems right for a testing phase, while higher level bursts tended to span a few hours.
 
 \Discussion
 

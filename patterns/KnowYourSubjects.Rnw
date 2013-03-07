@@ -1,6 +1,8 @@
-\Name{Not Everyone is a Programmer} \label{pat:subjects}
+\Name{Not Everyone Fixes Bugs} \label{pat:subjects}
 %Meet the teams / Know your subjects}
 % [numeric analysis (inference)] [problem domain] 
+% One role does not fit all
+% Quality with a name
 
 \Problem
 
@@ -27,9 +29,9 @@
   
   Then, compute the ratio between verifications and fixes for each developer (add 1 to the number of fixes to avoid division by zero). If such ratio is greater than some threshold (e.g., 5 or 10), it suggests that the developer is specialized in verifications. Select all such developers and compute the total number of verifications performed by them, compared to the total number of verifications in the project. If they perform a great part of the verifications in the project (e.g., more than 50\%), then the project has a quality engineering team, formed by that developers.
 
-%    changed a bug 
+  Choosing a suitable threshold is a hard problem. If the threshold is too high, then only the most active quality engineers are chosen; if it is too low, then sporadic contributors, who have contributed with a few verifications, are also regarded as quality engineers.
 
-% Analyze their activity in the bug tracking system, specially the status changes. Count the relative number of activities. Plot distribution of ratios. After discovering a group of developers with a specific role, see if the group is responsible for most of that activity in the project.
+  One possible criterion is to choose a threshold that results in the smallest quality team that still contributes to a large part of the verifications performed in the project. First, compute, for each candidate threshold (e.g., from 0 to 50), the size of the quality team and the percent of verifications its members performed in the project. Then create a scatter plot of percent of verifications vs. size of quality team. Finally, look for a point in the plot such as that increasing the size of the quality team does not significantly increase the percent of verifications\footnote{This is similar to the elbow criterion, used to find the optimal number of clusters in a data set.}. The value used to compute this point is the chosen threshold.
 
 \Discussion
 

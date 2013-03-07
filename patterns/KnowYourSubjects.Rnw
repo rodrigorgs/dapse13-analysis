@@ -31,7 +31,7 @@
 
   Choosing a suitable threshold is a hard problem. If the threshold is too high, then only the most active quality engineers are chosen; if it is too low, then sporadic contributors, who have contributed with a few verifications, are also regarded as quality engineers.
 
-  One possible criterion is to choose a threshold that results in the smallest quality team that still contributes to a large part of the verifications performed in the project. First, compute, for each candidate threshold (e.g., from 0 to 50), the size of the quality team and the percent of verifications its members performed in the project. Then create a scatter plot of percent of verifications vs. size of quality team. Finally, look for a point in the plot such as that increasing the size of the quality team does not significantly increase the percent of verifications\footnote{This is similar to the elbow criterion, used to find the optimal number of clusters in a data set.}. The value used to compute this point is the chosen threshold.
+  One possible criterion is to choose a threshold that results in the smallest quality team that still contributes to a large part of the verifications performed in the project. First, compute, for each candidate threshold (e.g., from 1 to 50), the size of the quality team and the number of verifications its members performed in the project. Then create a scatter plot of number of verifications vs. size of quality team. Finally, look for a point in the plot such as that increasing the size of the quality team does not significantly increase the number of verifications\footnote{This is similar to the elbow criterion, used to find the optimal number of clusters in a data set.}. The value used to compute this point is the chosen threshold.
 
 \Discussion
 
@@ -41,7 +41,7 @@
 
 \Example
 
-  This solution was used by Souza and Chavez~\cite{Souza2012}. They used a threshold of 10 for the ratio between verifications and fixes. In the source code below, we show how to apply this solution to NetBeans/Platform:
+  This solution was used by Souza and Chavez~\cite{Souza2012}. They used a threshold of 10 for the ratio between verifications and fixes (referring to the ratio usually used to distinguish between order of magnitudes). In the following source code, we show how to apply this solution to NetBeans/Platform. First, compute the number of verifications and fixes for each user:
 
 <<echo=FALSE,results=hide>>=
 changes <- readRDS("../data/netbeans-platform-changes.rds")
@@ -51,17 +51,41 @@ resolution <- subset(changes, field == 'resolution')
 status <- subset(changes, field == 'bug_status')
 t1 <- table(resolution$user, resolution$new.value)
 t2 <- table(status$user, status$new.value)
-t <- merge(as.data.frame.matrix(t1), 
+user <- merge(as.data.frame.matrix(t1), 
            as.data.frame.matrix(t2),
            by="row.names")
-threshold <- 10
-t$qe <- t$VERIFIED / (1 + t$FIXED) > threshold
-total <- sum(t$VERIFIED)
-proportion <- sum(t$VERIFIED[t$qe]) / total
-num.qe.developers <- sum(t$qe)
+user$ratio <- user$VERIFIED / (1 + user$FIXED)
 @
 
-  By running the code, we find there are \Sexpr{num.qe.developers} quality engineers, who are responsible for about \Sexpr{as.integer(100*proportion)}\% of the verifications.
+  Next, choose a threshold. For that, plot for each possible threshold between 1 and 50, the relative number of verifications vs. the relative size of quality team (for simplicity, we use percentages and label only thresholds that are multiples of five):
+
+<<fig=T>>=
+thresholds <- seq(1, 50, by=0.5)
+size.of.team <- 100 * sapply(thresholds, 
+  function(t) mean(user$ratio > t))
+verified.by.team <- 100 * sapply(thresholds, function(t) 
+  sum(user$VERIFIED[user$ratio > t]) / sum(user$VERIFIED))
+plot(verified.by.team ~ size.of.team, type='l')
+
+df <- data.frame(thresholds, size.of.team, verified.by.team)
+df <- subset(df, thresholds %% 5 == 0)
+points(df$size.of.team, df$verified.by.team)
+text(df$size.of.team, df$verified.by.team, df$thresholds, pos=2)
+@
+
+<<echo=F,results=hide>>=
+threshold <- 15
+
+user$qe <- user$ratio > threshold
+
+num.qe.developers <- sum(user$qe)
+percent.qe.developers <- format(round(100*mean(user$qe), 1), nsmall=1)
+num.qe.verifications <- sum(user$VERIFIED[user$qe])
+proportion.qe.verifications <- num.qe.verifications / sum(user$VERIFIED)
+percent.qe.verifications <- format(round(100*proportion.qe.verifications, 0), nsmall=0)
+@
+
+  By visually inspecting the plot, we choose \Sexpr{threshold} as the threshold. By inspecting the plot and the data, we find that the quality engineering team is formed by \Sexpr{num.qe.developers} members (about $\Sexpr{percent.qe.developers}\%$), who contributed with \Sexpr{num.qe.verifications} verifications (about $\Sexpr{percent.qe.verifications}\%$).
 
 \RelatedPatterns
 

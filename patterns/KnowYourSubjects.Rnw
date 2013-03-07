@@ -1,4 +1,4 @@
-\Name{Not Everyone Fixes Bugs} \label{pat:subjects}
+\Name{Fixers and Verifiers} \label{pat:subjects}
 %Meet the teams / Know your subjects}
 % [numeric analysis (inference)] [problem domain] 
 % One role does not fit all
@@ -6,12 +6,12 @@
 
 \Problem
 
-  Find the quality engineers on a team, if there is any.
+  Find the quality engineering team (if it exists).
   %Discover the role of a developer in the bug tracking process.
 
 \Context
 
-  Developers tend to assume specific roles in the software development process. While many developers participate by fixing bugs, quality engineers usually take bug fixes and verify if they are appropriate. Making the distinction between quality engineers and other developers is important when studying the influence of human factors on outcomes of the software development process.
+  Developers tend to assume specific roles in the software development process. While many developers participate by fixing bugs, quality engineers usually take bug fixes and verify if they are appropriate. Making the distinction between quality engineers (``verifiers'') and programmers who fixes bugs (``fixers'') is important when studying the influence of human factors on outcomes of the software development process.
 
   %Not all developers fix bugs as their main activity. Quality engineers Some developers are \emph{fixers}, i.e., they write code to resolve open bugs. \emph{Verifiers}, on the other hand, check if the fixes are appropriate. 
 
@@ -19,7 +19,7 @@
 
 \Solution
 
-  Analyze each developer's activity in the bug tracking system, such as status and resolution changes. In particular, count how many times each developer has...
+  To find members of the quality team, first analyze each developer's activity in the bug tracking system, such as status and resolution changes. In particular, count how many times each developer has...
 
   \begin{itemize}
   	\item ... changed the status to {\tt VERIFIED} (number of verifications);
@@ -27,25 +27,27 @@
   	%\item ... changed the resolution to {\tt DUPLICATE}.
   \end{itemize}
   
-  Then, compute the ratio between verifications and fixes for each developer (add 1 to the number of fixes to avoid division by zero). If such ratio is greater than some threshold (e.g., 5 or 10), it suggests that the developer is specialized in verifications. Select all such developers and compute the total number of verifications performed by them, compared to the total number of verifications in the project. If they perform a great part of the verifications in the project (e.g., more than 50\%), then the project has a quality engineering team, formed by that developers.
+  Then, compute the ratio between verifications and fixes for each developer (add 1 to the number of fixes to avoid division by zero). If such ratio is greater than some threshold (e.g., 5 or 10), it suggests that the developer is specialized in verifications. Select all such developers and compute the total number of verifications performed by them, compared to the total number of verifications in the project. If they perform a great part of the verifications in the project (e.g., more than 50\%), then the project has a quality team, formed by that developers.
 
-  Choosing a suitable threshold is a hard problem. If the threshold is too high, then only the most active quality engineers are chosen; if it is too low, then sporadic contributors, who have contributed with a few verifications, are also regarded as quality engineers.
+  Choosing a suitable threshold for the ratio between verifications and fixes is a hard problem. If the threshold is too high, then only the most active quality engineers are chosen; if it is too low, then sporadic contributors, who have contributed with a few verifications, may also regarded as quality engineers.
 
-  One possible criterion is to choose a threshold that results in the smallest quality team that still contributes to a large part of the verifications performed in the project. First, compute, for each candidate threshold (e.g., from 1 to 50), the size of the quality team and the number of verifications its members performed in the project (see Figure~\ref{fig:threshold} in the \emph{Examples} section). Then create a scatter plot of number of verifications vs. size of quality team. Finally, look for a point in the plot such as that increasing the size of the quality team does not significantly increase the number of verifications\footnote{This is similar to the elbow criterion, used to find the optimal number of clusters in a data set.}. The value used to compute this point is the chosen threshold.
+  One possible criterion is to choose a threshold that results in the smallest quality team that still contributes with large part of the verifications performed in the project. First, compute, for each candidate threshold (e.g., from 1 to 50), the size of the quality team and the number of verifications its members performed in the project. Then create a scatter plot of number of verifications vs. size of quality team (see Figure~\ref{fig:threshold} in the \emph{Examples} section). Finally, look for a point in the plot such as that increasing the size of the quality team does not significantly increase the number of verifications\footnote{This is similar to the elbow criterion, used to find the optimal number of clusters in a data set.}. The value used to compute this point is the chosen threshold.
 
 \Discussion
 
-  It is a common mistake to use the absolute number of verifications to determine if a developer is a quality engineer. The absolute number is a poor indicator because, in some projects, developers that fix bugs also mark them as {\tt VERIFIED}. %Because of that, the ratio between verifications and fixes is a better indicator.
+  It is a common mistake to use the absolute number of verifications to determine if a developer is a quality engineer. It is a poor indicator because, in some projects, developers that fix bugs also mark them as {\tt VERIFIED}. %Because of that, the ratio between verifications and fixes is a better indicator.
 
   Developers can change roles over time. If this is the case, consider analyzing a shorter period of time. Even better, use sliding windows, i.e., analyze multiple consecutive short periods, one at a time.
 
 \Example
 
 <<echo=FALSE,results=hide>>=
-par(mar=c(4.5,4,1,1)+0.1)
+par(mar=c(0,0,0,0)+0.1)
 @
 
-  This solution was used by Souza and Chavez~\cite{Souza2012}. They used a threshold of 10 for the ratio between verifications and fixes (referring to the ratio usually used to distinguish between order of magnitudes). In the following source code, we show how to apply this solution to NetBeans/Platform. First, compute the number of verifications and fixes for each user:
+  This solution was used by Souza and Chavez~\cite{Souza2012}. They chose a threshold of 10 for the ratio between verifications and fixes, but did not explain their choice. 
+
+  In the following source code, we show how to apply this solution to NetBeans/Platform. First, compute the number of verifications and fixes for each user:
 
 <<echo=FALSE,results=hide>>=
 changes <- readRDS("../data/netbeans-platform-changes.rds")
@@ -62,9 +64,11 @@ user <- merge(as.data.frame.matrix(t1),
 user$ratio <- user$VERIFIED / (1 + user$FIXED)
 @
 
-  Next, choose a threshold. For that, plot for each possible threshold between 1 and 50, the relative number of verifications vs. the relative size of quality team. In the following source code we use percentages for simplicity purposes. The result is the plot in Figure~\ref{fig:threshold}.
+  Next, choose a threshold. To do that, first plot, for each number between 1 and 50, the relative number of verifications (\%) vs. the relative size of quality team (\%). The source code is omitted from this paper for space reasons, but can be found online (see Section~\ref{sec:dataset}).
+  %In the following source code we use percentages for simplicity purposes. 
+  The result is the plot in Figure~\ref{fig:threshold}, which show percentage values for the variables.
 
-<<figthreshold,include=FALSE>>=
+<<figthreshold,include=FALSE,echo=F>>=
 thresholds <- seq(1, 50, by=0.5)
 size.of.team <- 100 * sapply(thresholds, 
   function(t) mean(user$ratio > t))
@@ -87,7 +91,7 @@ text(df$size.of.team, df$verified.by.team,
 <<fig=TRUE,echo=FALSE,width=6,height=4>>=
 <<figthreshold>>
 @
-  \caption{Plot used to choose a threshold.}
+  \caption{Plot used to choose a threshold for the ratio between verifications and fixes. Labeled circles represent candidate thresholds.}
   \label{fig:threshold}
 \end{figure}
 
@@ -103,8 +107,8 @@ proportion.qe.verifications <- num.qe.verifications / sum(user$VERIFIED)
 percent.qe.verifications <- format(round(100*proportion.qe.verifications, 0), nsmall=0)
 @
 
-  By visually inspecting the plot, we choose \Sexpr{threshold} as the threshold. By inspecting the plot and the data, we find that the quality engineering team is formed by \Sexpr{num.qe.developers} members (about $\Sexpr{percent.qe.developers}\%$), who contributed with \Sexpr{num.qe.verifications} verifications (about $\Sexpr{percent.qe.verifications}\%$).
+  By visually inspecting the plot, we choose \Sexpr{threshold} as the threshold, because choosing a lower value increases the size of the team without significantly increasing the number of verifications. Choosing this threshold, the discovered quality team is formed by \Sexpr{num.qe.developers} members ($\Sexpr{percent.qe.developers}\%$), who contributed with \Sexpr{num.qe.verifications} verifications ($\Sexpr{percent.qe.verifications}\%$).
 
 \RelatedPatterns
 
-  While this patterns helps locate people who concentrate quality efforts, the pattern \emph{Testing Phase} (Section~\ref{pat:phase}) helps find periods in which such efforts are concentrated.
+  While this patterns helps identify people who concentrate quality efforts, the pattern \emph{Testing Phase} (Section~\ref{pat:phase}) helps find periods in which such efforts are concentrated.

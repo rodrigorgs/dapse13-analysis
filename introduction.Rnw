@@ -6,56 +6,20 @@ Bug reports help compute many statistics related to quality and software develop
 
 Even better, the raw data can be transformed into higher level information about developers and the software development process. With such information, one can infer developer roles, developers' workflow \cite{Poncin2011}, software lifecycle phases, and so on.
 
-In this paper, we present patterns to transform bug data into higher level information about the software verification process. A pattern consists of 7 sections: (1) a short \emph{name}; (2) the \emph{problem} being solved; (3) a \emph{context} in which the pattern can be applied; (4) one or more \emph{solutions} to the problem; (5) a \emph{discussion} of trade-offs and common mistakes to consider when using the pattern; (6) \emph{examples} of the pattern in use; and (7) \emph{related patterns}.
+In this paper, we present patterns to transform bug data into higher level information about the software verification process. Each pattern contains an \emph{Examples} section with code snippets showing how to apply the pattern on real data. The snippets are written in R, a programming language for data analysis\footnote{\url{http://www.r-project.org/}}. 
+
+%A pattern consists of 7 sections: (1) a short \emph{name}; (2) the \emph{problem} being solved; (3) a \emph{context} in which the pattern can be applied; (4) one or more \emph{solutions} to the problem; (5) a \emph{discussion} of trade-offs and common mistakes to consider when using the pattern; (6) \emph{examples} of the pattern in use; and (7) \emph{related patterns}.
 
 The next section presents the data set used in this paper. Section~\ref{pat:subjects} presents a pattern, called \emph{Not Everyone is a Programmer}, that helps discover quality engineers using only bug report data. Finally, Section~\ref{pat:phase}, \emph{Testing Phase}, shows how to detect testing phases in the software development life cycle.
 
-\section{Data Set}
+\section{Data Set}~\label{sec:dataset}
 
-Each pattern contains an \emph{Examples} section with code snippets showing how to apply the pattern on real data. The snippets are written in R, a programming language for data analysis\footnote{\url{http://www.r-project.org/}}. The data used are bug reports from the projects NetBeans/Platform and Eclipse/Platform, made available for the 2011 edition of the MSR Mining Challenge\footnote{http://2011.msrconf.org/msr-challenge.html}.
+The data used are bug reports from the projects NetBeans/Platform and Eclipse/Platform, made available for the 2011 edition of the MSR Mining Challenge\footnote{http://2011.msrconf.org/msr-challenge.html}. Both projects use Bugzilla\footnote{\url{http://www.bugzilla.org/}} as their bug tracking system, which stores all data in a MySQL database. %The source code presented here refers to database tables and columns used by Bugzilla, but it should work with any bug tracking system with minor changes.
 
-Both projects use Bugzilla\footnote{\url{http://www.bugzilla.org/}} as their bug tracking system, which stores all data in a MySQL database. The source code presented here refers to database tables and columns used by Bugzilla, but it should work with any bug tracking system with minor changes.
+Although the full data set contains almost 60 database tables, in this paper only one is used: {\tt changes} (originally, {\tt bugs\_activity}). The {\tt bugs\_activity} table and a few columns were renamed for clarity purposes.
 
-Although the full data set contains almost 60 database tables, in this paper only two are used: {\tt bugs} and {\tt changes} (originally, {\tt bugs\_activity}). The {\tt bugs\_activity} table and a few columns were renamed for clarity purposes.
+The {\tt changes} table contains all modifications users made on bug reports over time. This includes changes in priority, status, resolution, or any other field in a bug report. Each row contains the {\tt new value} of a {\tt field} that was modified by a {\tt user}\footnote{In this context, user denotes a user of the bug tracking system, which can be either a developer or a final user.} at some point in {\tt time}.
 
-The {\tt bugs} table contains general information about each bug report, which is identified by a unique number (column {\tt bug}). Each bug report has a {\tt severity}, a {\tt priority}, and two timestamps: the time of creation ({\tt creation.time}), and the time of the last modification ({\tt modif.time}). Table~\ref{tab:bugs} shows a sample of the {\tt bugs} table.
+In this paper, two changes are explored: the change of {\tt resolution} to {\tt FIXED} (meaning that the bug was fixed by modifying the source code), and the change of {\tt bug\_status} to {\tt VERIFIED} (meaning that the fix was considered appropriate by someone else).
 
-<<echo=FALSE, results=tex>>=
-nrows <- 4
-library(xtable)
-bugs <- readRDS("data/netbeans-platform-bugs.rds")
-bugs <- head(bugs, nrows)
-bugs$creation.time <- as.character(as.Date(bugs$creation.time))
-bugs$modif.time <- as.character(as.Date(bugs$modif.time))
-bugs$reporter <- NULL
-x <- xtable(bugs,
-  caption="Sample of {\\tt bugs} table, hour info omitted.",
-  label="tab:bugs")
-print(x, 
-  include.rownames=FALSE, 
-  caption.placement="top",
-  table.placement="!t")
-@
-
-The {\tt changes} table contains all modifications users made on bug reports over time. This includes changes in priority, status, resolution, or any other field in a bug report. Each row contains the {\tt new value} of a {\tt field} that was modified by a {\tt user}\footnote{In this context, user denotes a user of the bug tracking system, which can be either a developer or a final user.} at some point in {\tt time}. Table~\ref{tab:changes} shows a sample of the {\tt changes} table.
-
-<<echo=FALSE, results=tex>>=
-library(xtable)
-first.row <- 3
-changes <- readRDS("data/netbeans-platform-changes.rds")
-changes <- subset(changes, field %in% c("bug_status", "resolution"))[first.row:(first.row+nrows-1),]
-changes$time <- as.character(as.Date(changes$time))
-x <- xtable(changes,
-  caption="Sample of {\\tt changes} table, hour info omitted.",
-  label="tab:changes")
-print(x, 
-  include.rownames=FALSE, 
-  caption.placement="top",
-  table.placement="!t")
-@
-
-The {\tt bug\_status} field is used to track the progress of the bug fixing activity. A bug report is created with status {\tt NEW} or {\tt UNCONFIRMED}. Then, its status may be changed to {\tt ASSIGNED}, to denote that a user has taken responsibility on the bug. After that, the bug is {\tt RESOLVED}, then optionally {\tt VERIFIED} by the quality assurance team, and finally {\tt CLOSED} when the next software release comes out. If, after resolving the bug, someone finds that the resolution was not appropriate, the status is changed to {\tt REOPENED}.
-
-There are many ways to resolve a bug. To reflect that, when a bug status is changed to {\tt RESOLVED}, the {\tt resolution} field is changed either to {\tt FIXED} (if the software was changed to solve the issue), {\tt WORKSFORME} (if developers were not able to reproduce the problem), {\tt DUPLICATE} (if a previous bug report describes the same problem), among other resolutions.
-
-All the data and code used in this paper is available online\footnote{\url{https://github.com/rodrigorgs/dapse13-bugpatterns}}. 
+All the data and code used in this paper is available online\footnote{\url{https://github.com/rodrigorgs/dapse13-analysis}}. 

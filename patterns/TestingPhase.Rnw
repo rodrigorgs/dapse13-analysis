@@ -28,7 +28,11 @@
 
   %There is a third solution, not discussed here: use Kleinberg's algorithm~\cite{Kleinberg2002} to detect bursts of verification activity. It uses a Markov model and is more computationally intensive. The algorithm is implemented in a R package called {\tt bursts}.
 
-  Be suspicious if the number of verifications per day is too high (e.g., above 50). Such verifications may be the result of a mass verification, when multiple bug reports are simultaneously updated in order to tidy the bug tracking system. To determine if this is the case, analyze the individual verifications on that day. If most of them were performed by the same person, a few seconds or minutes apart from each other, then they are likely the result of a mass verification.
+  Be suspicious if the number of verifications per day is too high (e.g., above 50). Such verifications may be the result of a mass verification, when multiple bug reports are simultaneously updated in order to tidy the bug tracking system~\cite{Souza2013a}.
+
+  Some teams have dedicated quality engineers that are responsible for testing. Well-defined testing phases are less common in such teams, because quality engineers constantly test features and bug fixes, and therefore do not need to switch between programming and testing activities. 
+
+  %To determine if this is the case, analyze the individual verifications on that day. If most of them were performed by the same person, a few seconds or minutes apart from each other, then they are likely the result of a mass verification.
 
 \Example
 
@@ -111,4 +115,6 @@ print(x,
 
 \RelatedPatterns
 
-  It should be noted that \emph{Not Everyone is a Programmer} (Section ~\ref{pat:subjects}): some teams have dedicated quality engineers that are responsible for testing. Well-defined testing phases are less common in such teams, because quality engineers constantly test features and bug fixes, and therefore do not need to switch between programming and testing activities.
+  Before applying this pattern, use the \emph{Look Out For Mass Updates} pattern~\cite{Souza2013a} to remove mass verifications from the data. Periods which include mass verifications can be confused with testing phases.
+
+  Use the \emph{Fixers and Verifiers} pattern (Section ~\ref{pat:subjects}) to assess if the project has a quality team. The existence of such teams may explain the absence of a testing phase.

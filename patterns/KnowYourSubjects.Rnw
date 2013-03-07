@@ -31,7 +31,7 @@
 
   Choosing a suitable threshold is a hard problem. If the threshold is too high, then only the most active quality engineers are chosen; if it is too low, then sporadic contributors, who have contributed with a few verifications, are also regarded as quality engineers.
 
-  One possible criterion is to choose a threshold that results in the smallest quality team that still contributes to a large part of the verifications performed in the project. First, compute, for each candidate threshold (e.g., from 1 to 50), the size of the quality team and the number of verifications its members performed in the project. Then create a scatter plot of number of verifications vs. size of quality team. Finally, look for a point in the plot such as that increasing the size of the quality team does not significantly increase the number of verifications\footnote{This is similar to the elbow criterion, used to find the optimal number of clusters in a data set.}. The value used to compute this point is the chosen threshold.
+  One possible criterion is to choose a threshold that results in the smallest quality team that still contributes to a large part of the verifications performed in the project. First, compute, for each candidate threshold (e.g., from 1 to 50), the size of the quality team and the number of verifications its members performed in the project (see Figure~\ref{fig:threshold} in the \emph{Examples} section). Then create a scatter plot of number of verifications vs. size of quality team. Finally, look for a point in the plot such as that increasing the size of the quality team does not significantly increase the number of verifications\footnote{This is similar to the elbow criterion, used to find the optimal number of clusters in a data set.}. The value used to compute this point is the chosen threshold.
 
 \Discussion
 
@@ -41,13 +41,18 @@
 
 \Example
 
+<<echo=FALSE,results=hide>>=
+par(mar=c(4.5,4,1,1)+0.1)
+@
+
   This solution was used by Souza and Chavez~\cite{Souza2012}. They used a threshold of 10 for the ratio between verifications and fixes (referring to the ratio usually used to distinguish between order of magnitudes). In the following source code, we show how to apply this solution to NetBeans/Platform. First, compute the number of verifications and fixes for each user:
 
 <<echo=FALSE,results=hide>>=
 changes <- readRDS("../data/netbeans-platform-changes.rds")
 @
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 <<>>=
-resolution <- subset(changes, field == 'resolution')
+resolution <- subset(changes, field=='resolution')
 status <- subset(changes, field == 'bug_status')
 t1 <- table(resolution$user, resolution$new.value)
 t2 <- table(status$user, status$new.value)
@@ -57,21 +62,34 @@ user <- merge(as.data.frame.matrix(t1),
 user$ratio <- user$VERIFIED / (1 + user$FIXED)
 @
 
-  Next, choose a threshold. For that, plot for each possible threshold between 1 and 50, the relative number of verifications vs. the relative size of quality team (for simplicity, we use percentages and label only thresholds that are multiples of five):
+  Next, choose a threshold. For that, plot for each possible threshold between 1 and 50, the relative number of verifications vs. the relative size of quality team. In the following source code we use percentages for simplicity purposes. The result is the plot in Figure~\ref{fig:threshold}.
 
-<<fig=T>>=
+<<figthreshold,include=FALSE>>=
 thresholds <- seq(1, 50, by=0.5)
 size.of.team <- 100 * sapply(thresholds, 
   function(t) mean(user$ratio > t))
-verified.by.team <- 100 * sapply(thresholds, function(t) 
-  sum(user$VERIFIED[user$ratio > t]) / sum(user$VERIFIED))
+verified.by.team <- 100 * sapply(thresholds, 
+  function(t) sum(user$VERIFIED[user$ratio > t]) / 
+    sum(user$VERIFIED))
 plot(verified.by.team ~ size.of.team, type='l')
 
-df <- data.frame(thresholds, size.of.team, verified.by.team)
+# Label thresholds
+df <- data.frame(thresholds, size.of.team, 
+  verified.by.team)
 df <- subset(df, thresholds %% 5 == 0)
 points(df$size.of.team, df$verified.by.team)
-text(df$size.of.team, df$verified.by.team, df$thresholds, pos=2)
+text(df$size.of.team, df$verified.by.team, 
+  df$thresholds, pos=2)
 @
+
+\begin{figure}[!t]
+\centering
+<<fig=TRUE,echo=FALSE,width=6,height=4>>=
+<<figthreshold>>
+@
+  \caption{Plot used to choose a threshold.}
+  \label{fig:threshold}
+\end{figure}
 
 <<echo=F,results=hide>>=
 threshold <- 15

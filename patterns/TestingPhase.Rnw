@@ -58,7 +58,7 @@ abline(v=releases$date, lty=2)
 
 <<figphases,echo=FALSE,include=FALSE>>=
 library(zoo)
-par(mar=c(4.5,4,1,1)+0.1)
+par(mar=c(4.5,4,0,1)+0.1)
 with(ver, plot(n.changes ~ time, type="l", xaxt="n", xlab=""))
 abline(v=releases$date, lty=2)
 ticks <- seq(min(ver$time), max(ver$time), by = "months")
@@ -70,7 +70,7 @@ axis(1, at = ticks, labels=labels, las=2)
 
 \begin{figure}[!t]
 \centering
-<<fig=TRUE,echo=FALSE,width=6,height=4.0>>=
+<<fig=TRUE,echo=FALSE,width=6,height=3.0>>=
 <<figphases>>
 @
   \caption{Accumulated number of verifications over time.}
@@ -78,7 +78,7 @@ axis(1, at = ticks, labels=labels, las=2)
 \end{figure}
 
 <<echo=FALSE,results=hide>>=
-nrows <- 5
+nrows <- 4
 @
 
   The following R code shows how to apply the second solution, using Kleinberg's algorithm and taking second-level bursts. Then, we count the number of verifications, total and per day, in each burst. The variable {\tt ver} is reused from the previous snippet of code. The first \Sexpr{nrows} bursts are shown in Table~\ref{tab:bursts}.

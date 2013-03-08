@@ -1,25 +1,23 @@
 \section{Introduction}
 
-Bug tracking systems record in their bug reports the collaboration between final users and developers in order to fix bugs. Such rich exchange of information can be used by data scientists to reason about the software development process of a team.
+Bug tracking systems record in their bug reports the collaboration between final users and developers in order to fix bugs. Such exchange of information can be help data scientists reason about the software development process.
 
-Bug reports help compute many statistics related to quality and software development. For example, how many bugs are reported per day, on average? What proportion of bugs are considered invalid? What is the average bug lifetime?
+Bug reports help compute many statistics related to quality and software development. For example, how many bugs are reported per day? What proportion of bugs are considered invalid? What is the average bug lifetime?
 
-Even better, the raw data can be transformed into higher level information about developers and the software development process. With such information, one can infer developer roles, developers' workflow \cite{Poncin2011}, software lifecycle phases, and so on.
+Even better, the raw data can be transformed into higher level information about developers and the software development process. With such information, one can infer developer roles, developers' workflow, software lifecycle phases, and so on.
 
 In this paper, we present patterns to transform bug data into higher level information about the software verification process. Each pattern contains an \emph{Examples} section with code snippets showing how to apply the pattern on real data. The snippets are written in R, a programming language for data analysis\footnote{\url{http://www.r-project.org/}}. 
 
 %A pattern consists of 7 sections: (1) a short \emph{name}; (2) the \emph{problem} being solved; (3) a \emph{context} in which the pattern can be applied; (4) one or more \emph{solutions} to the problem; (5) a \emph{discussion} of trade-offs and common mistakes to consider when using the pattern; (6) \emph{examples} of the pattern in use; and (7) \emph{related patterns}.
 
-The next section presents the data set used in this paper. Section~\ref{pat:subjects} presents a pattern, called \emph{Not Everyone is a Programmer}, that helps discover quality engineers using only bug report data. Finally, Section~\ref{pat:phase}, \emph{Testing Phase}, shows how to detect testing phases in the software development life cycle.
+The next section presents the data set used in this paper. Section~\ref{pat:subjects} presents the \emph{Not Everyone is a Programmer} pattern, that helps discover quality engineers from bug reports. Section~\ref{pat:phase}, \emph{Testing Phase}, shows how to detect testing phases in the software development life cycle.
 
 \section{Data Set}~\label{sec:dataset}
 
-The data used are bug reports from the projects NetBeans/Platform and Eclipse/Platform, made available for the 2011 edition of the MSR Mining Challenge\footnote{http://2011.msrconf.org/msr-challenge.html}. Both projects use Bugzilla\footnote{\url{http://www.bugzilla.org/}} as their bug tracking system, which stores all data in a MySQL database. %The source code presented here refers to database tables and columns used by Bugzilla, but it should work with any bug tracking system with minor changes.
+The examples in this paper use bug reports from NetBeans/Platform and Eclipse/Platform, made available for the 2011 edition of the MSR Mining Challenge\footnote{http://2011.msrconf.org/msr-challenge.html}. Both projects use Bugzilla\footnote{\url{http://www.bugzilla.org/}} as their bug tracking system. %The source code presented here refers to database tables and columns used by Bugzilla, but it should work with any bug tracking system with minor changes.
 
-Although the full data set contains almost 60 database tables, in this paper only one is used: {\tt changes} (originally, {\tt bugs\_activity}). The {\tt bugs\_activity} table and a few columns were renamed for clarity purposes.
+Bugzilla stores all modifications users make to bug reports, including changes in priority, status, resolution, or any other field in a bug report. In the examples, such data is available in the {\tt changes} table, in which each row contains the {\tt new value} of a {\tt field} that was modified by a {\tt user}\footnote{In this context, user denotes a user of the bug tracking system, which can be either a developer or a final user.} at some point in {\tt time}.
 
-The {\tt changes} table contains all modifications users made on bug reports over time. This includes changes in priority, status, resolution, or any other field in a bug report. Each row contains the {\tt new value} of a {\tt field} that was modified by a {\tt user}\footnote{In this context, user denotes a user of the bug tracking system, which can be either a developer or a final user.} at some point in {\tt time}.
-
-In this paper, two changes are explored: the change of {\tt resolution} to {\tt FIXED} (meaning that the bug was fixed by modifying the source code), and the change of {\tt bug\_status} to {\tt VERIFIED} (meaning that the fix was considered appropriate by someone else).
+In this paper, two kinds of change are explored: the change of {\tt resolution} to {\tt FIXED} (meaning that the bug was fixed by modifying the source code), and the change of {\tt bug\_status} to {\tt VERIFIED} (meaning that the fix was considered appropriate by someone else).
 
 All the data and code used in this paper is available online\footnote{\url{https://github.com/rodrigorgs/dapse13-analysis}}. 

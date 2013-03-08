@@ -11,7 +11,7 @@
 
 \Context
 
-  Developers tend to assume specific roles in the software development process. While many developers participate by fixing bugs, quality engineers usually take bug fixes and verify if they are appropriate. Making the distinction between quality engineers (``verifiers'') and programmers who fixes bugs (``fixers'') is important when studying the influence of human factors on outcomes of the software development process.
+  Developers tend to assume specific roles in the software development process. While many developers participate by fixing bugs, quality engineers usually take bug fixes and verify if they are appropriate. Making the distinction between quality engineers (``verifiers'') and programmers who fix bugs (``fixers'') is important when studying the influence of human factors on outcomes of the software development process.
 
   %Not all developers fix bugs as their main activity. Quality engineers Some developers are \emph{fixers}, i.e., they write code to resolve open bugs. \emph{Verifiers}, on the other hand, check if the fixes are appropriate. 
 
@@ -35,15 +35,15 @@
 
 \Discussion
 
-  It is a common mistake to use the absolute number of verifications to determine if a developer is a quality engineer. It is a poor indicator because, in some projects, developers that fix bugs also mark them as {\tt VERIFIED}. %Because of that, the ratio between verifications and fixes is a better indicator.
+  It is a common mistake to use the absolute number of verifications to determine if a developer is a quality engineer. This is a poor indicator because, in some projects, developers that fix bugs also mark them as {\tt VERIFIED}. %Because of that, the ratio between verifications and fixes is a better indicator.
 
-  Developers can change roles over time. If this is the case, consider analyzing a shorter period of time. Even better, use sliding windows, i.e., analyze multiple consecutive short periods, one at a time.
+  Developers can change roles over time. If this is the case, consider using sliding windows, i.e., analyze multiple consecutive short periods.%, one at a time.
+
+  The solution to this pattern can be adapted to perform similar analyses on different types of change.
+
+  %The process could be adapted to perform similar analysis on different types of bug activity or even different data points.
 
 \Example
-
-<<echo=FALSE,results=hide>>=
-par(mar=c(0,0,0,0)+0.1)
-@
 
   This solution was used by Souza and Chavez~\cite{Souza2012}. They chose a threshold of 10 for the ratio between verifications and fixes, but did not explain their choice. 
 
@@ -69,6 +69,8 @@ user$ratio <- user$VERIFIED / (1 + user$FIXED)
   The result is the plot in Figure~\ref{fig:threshold}, which show percentage values for the variables.
 
 <<figthreshold,include=FALSE,echo=F>>=
+par(mar=c(4,4,0,2)+0.1)
+
 thresholds <- seq(1, 50, by=0.5)
 size.of.team <- 100 * sapply(thresholds, 
   function(t) mean(user$ratio > t))
@@ -88,7 +90,7 @@ text(df$size.of.team, df$verified.by.team,
 
 \begin{figure}[!t]
 \centering
-<<fig=TRUE,echo=FALSE,width=6,height=4>>=
+<<fig=TRUE,echo=FALSE,width=6,height=3.0>>=
 <<figthreshold>>
 @
   \caption{Plot used to choose a threshold for the ratio between verifications and fixes. Labeled circles represent candidate thresholds.}
